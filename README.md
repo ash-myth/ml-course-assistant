@@ -1,16 +1,11 @@
----
-title: RAG Project
-emoji: 🎓
-colorFrom: green
-colorTo: yellow
-sdk: docker
-pinned: false
----
 # Hindi ML Course Teaching Assistant
 
 A cross-lingual RAG system built over 38 Hindi machine learning lectures by Krish Naik. Ask questions in English, get answers grounded in Hindi video content — with exact video and timestamp citations.
 
 Most RAG projects are PDF-to-chatbot wrappers. This one works with audio/video: transcribing Hindi lectures with Whisper, chunking with timestamps, building semantic search over spoken content, and serving it through a production-grade API with MLOps instrumentation.
+
+**Frontend:** [ash-myth.github.io/ml-course-assistant](https://ash-myth.github.io/ml-course-assistant)  
+**API:** [ash-myth-rag-project.hf.space](https://ash-myth-rag-project.hf.space)
 
 ---
 
@@ -32,7 +27,7 @@ all-MiniLM-L6-v2        ← sentence embeddings (384D)
 FAISS IndexFlatIP       ← vector store, cosine similarity search
       │
       ▼
-CrossEncoder reranker   ← ms-marco-MiniLM-L-6-v2, top-10 → top-3
+CrossEncoder reranker   ← ms-marco-MiniLM-L-6-v2, top-20 → top-3
       │
       ▼
 Context expansion       ← ±20s window around each retrieved chunk
@@ -55,6 +50,17 @@ FastAPI + LangSmith     ← REST API with tracing and latency metrics
 **Timestamp-aware chunking** — every chunk carries its video number and timestamp. Retrieved context expands ±20 seconds around each hit before being passed to the LLM, giving it a coherent paragraph instead of isolated sentence fragments.
 
 **MLOps instrumentation** — every pipeline run is traced in LangSmith with per-stage latency (retrieve, rerank, LLM). A `/metrics` endpoint exposes p50/p95 latency stats across all requests.
+
+---
+
+## Evaluation
+
+Retrieval quality measured on 20 manually curated queries against ground-truth video labels.
+
+| Metric | Score |
+|---|---|
+| Hit@3 | 80% (16/20) |
+| Eval CI | GitHub Actions — runs on every push |
 
 ---
 
@@ -82,7 +88,7 @@ FastAPI + LangSmith     ← REST API with tracing and latency metrics
 ## Project Structure
 
 ```
-rag-project/
+ml-course-assistant/
 ├── create_chunks.py     # Whisper transcription + translation
 ├── embed_chunks.py      # Sentence embeddings + FAISS index
 ├── retrieve.py          # FAISS retrieval
@@ -90,6 +96,9 @@ rag-project/
 ├── answer.py            # Context expansion + LLM call + LangSmith tracing
 ├── app.py               # FastAPI server with metrics
 ├── index.html           # Frontend — chat UI with YouTube timestamp links
+├── eval/
+│   ├── questions.json   # 20 ground-truth eval queries
+│   └── eval.py          # Hit@3 evaluation harness
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt
@@ -109,8 +118,8 @@ rag-project/
 ### 1. Clone
 
 ```bash
-git clone https://github.com/ash-myth/hindi-ml-rag
-cd hindi-ml-rag
+git clone https://github.com/ash-myth/ml-course-assistant
+cd ml-course-assistant
 ```
 
 ### 2. Environment
@@ -130,8 +139,7 @@ Download the playlist and transcribe (one-time, runs overnight):
 
 ```bash
 pip install yt-dlp openai-whisper
-mkdir data
-yt-dlp -x --audio-format mp3 -o "data/%(playlist_index)02d_%(title)s.%(ext)s" "https://www.youtube.com/playlist?list=PLTDARY42LDV7WGmlzZtY-w9pemyPrKNUZ"
+yt-dlp -x --audio-format mp3 -o "audios/%(playlist_index)02d_%(title)s.%(ext)s" "https://www.youtube.com/playlist?list=PLTDARY42LDV7WGmlzZtY-w9pemyPrKNUZ"
 python create_chunks.py
 python embed_chunks.py
 ```
@@ -142,7 +150,7 @@ python embed_chunks.py
 docker compose up --build
 ```
 
-API runs at `http://localhost:8000`. Open `index.html` in your browser.
+API runs at `http://localhost:7860`. Open `index.html` in your browser.
 
 ### 5. Run without Docker
 
@@ -164,7 +172,7 @@ uvicorn app:app --reload
 ### Example
 
 ```bash
-curl -X POST http://localhost:8000/ask \
+curl -X POST http://localhost:7860/ask \
   -H "Content-Type: application/json" \
   -d '{"question": "what is precision and recall"}'
 ```
