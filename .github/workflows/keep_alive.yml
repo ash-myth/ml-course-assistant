@@ -1,0 +1,11 @@
+name: Keep Alive
+on:
+  schedule:
+    - cron: '*/20 * * * *'
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Ping HF Space
+      run: curl https://ash-myth-rag-project.hf.space/health
