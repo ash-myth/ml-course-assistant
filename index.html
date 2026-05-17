@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML Course Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080808;
+    --surface: #0f0f0f;
+    --surface2: #141414;
+    --border: #1e1e1e;
+    --border2: #252525;
+    --accent: #c8f542;
+    --accent-dim: #8aaa2a;
+    --text: #e2e2e2;
+    --text-dim: #666;
+    --text-muted: #333;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --serif: 'Instrument Serif', serif;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* header */
+  header {
+    flex-shrink: 0;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg);
+  }
+
+  .logo {
+    width: 28px;
+    height: 28px;
+    border: 1.5px solid var(--accent);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .header-text h1 {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+
+  .header-text p {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    margin-top: 0.1rem;
+  }
+
+  .status-dot {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--text-muted);
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* chat area */
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    scroll-behavior: smooth;
+  }
+
+  #chat::-webkit-scrollbar { width: 4px; }
+  #chat::-webkit-scrollbar-track { background: transparent; }
+  #chat::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .empty-state {
+    margin: auto;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .empty-state .icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+  }
+
+  .empty-state h2 {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 400;
+    font-style: italic;
+    color: #222;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state p {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* messages */
+  .turn { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .user-msg {
+    align-self: flex-end;
+    max-width: 72%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 14px 2px 14px 14px;
+    padding: 0.75rem 1rem;
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.55;
+  }
+
+  .assistant-msg {
+    align-self: flex-start;
+    max-width: 88%;
+  }
+
+  .answer-bubble {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 12px 12px 12px;
+    padding: 1rem 1.25rem;
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: #ccc;
+    white-space: pre-wrap;
+  }
+
+  .answer-bubble.streaming::after {
+    content: '▋';
+    color: var(--accent);
+    animation: blink 0.8s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    margin-top: 0.4rem;
+  }
+
+  .source-chip {
+    background: #0c1300;
+    border: 1px solid #1e2e00;
+    color: var(--accent-dim);
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    padding: 0.22rem 0.6rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .source-chip:hover {
+    background: #142000;
+    border-color: #304000;
+    color: var(--accent);
+  }
+
+  .latency {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  /* thinking indicator */
+  .thinking {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    padding: 0.5rem 0;
+  }
+
+  .thinking-dots span {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: bounce 1.2s infinite;
+  }
+
+  .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.3; }
+    40% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  /* input area */
+  .input-area {
+    flex-shrink: 0;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    padding: 1.25rem 2rem 1.5rem;
+  }
+
+  .input-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-end;
+  }
+
+  .input-wrap {
+    flex: 1;
+    position: relative;
+  }
+
+  #question {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    padding: 0.85rem 1rem;
+    outline: none;
+    resize: none;
+    line-height: 1.5;
+    max-height: 120px;
+    overflow-y: auto;
+    transition: border-color 0.15s;
+    caret-color: var(--accent);
+  }
+
+  #question::placeholder { color: var(--text-muted); }
+
+  #question:focus { border-color: #3a3a3a; }
+
+  #question::-webkit-scrollbar { width: 3px; }
+  #question::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  #send-btn {
+    background: var(--accent);
+    color: #0a0a0a;
+    border: none;
+    border-radius: 8px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+
+  #send-btn:hover { opacity: 0.85; }
+  #send-btn:active { transform: scale(0.95); }
+  #send-btn:disabled { opacity: 0.3; cursor: default; }
+
+  #send-btn svg { width: 16px; height: 16px; }
+
+  .hint {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-top: 0.6rem;
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">◈</div>
+  <div class="header-text">
+    <h1>ML Course Assistant</h1>
+    <p><a href="https://www.youtube.com/playlist?list=PLTDARY42LDV7WGmlzZtY-w9pemyPrKNUZ" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px solid #2a2a2a;">Krish Naik Hindi ML</a> · 38 lectures · 17,619 chunks</p>
+  </div>
+  <div class="status-dot">
+    <div class="dot" id="status-dot"></div>
+    <span id="status-text">connecting</span>
+  </div>
+</header>
+
+<div id="chat">
+  <div class="empty-state" id="empty">
+    <div class="icon">◈</div>
+    <h2>What do you want to learn?</h2>
+    <p>ASK ANYTHING ABOUT THE ML COURSE</p>
+  </div>
+</div>
+
+<div class="input-area">
+  <div class="input-inner">
+    <div class="input-wrap">
+      <textarea id="question" rows="1" placeholder="What is gradient boosting?"></textarea>
+    </div>
+    <button id="send-btn" title="Send">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="19" x2="12" y2="5"></line>
+        <polyline points="5 12 12 5 19 12"></polyline>
+      </svg>
+    </button>
+  </div>
+  <div class="hint">ENTER to send · SHIFT+ENTER for new line</div>
+  <div style="text-align:center;font-family:var(--mono);font-size:0.62rem;color:#222;margin-top:0.4rem;letter-spacing:0.06em;">built by ashmit chatterjee · 2026</div>
+</div>
+
+<script>
+const API = 'http://localhost:8000';
+
+const VIDEO_URLS = {
+  "01":"https://www.youtube.com/watch?v=7uwa9aPbBRU","02":"https://www.youtube.com/watch?v=jerPVDaHbEA",
+  "03":"https://www.youtube.com/watch?v=bRl2IXIjuqE","04":"https://www.youtube.com/watch?v=KUrm-F8mXJQ",
+  "05":"https://www.youtube.com/watch?v=KapPZCurdsQ","06":"https://www.youtube.com/watch?v=J_ESMRGpl74",
+  "07":"https://www.youtube.com/watch?v=PbK8Hm13Baw","08":"https://www.youtube.com/watch?v=_nvQKN8L1ZE",
+  "09":"https://www.youtube.com/watch?v=n40hS9tQmcY","10":"https://www.youtube.com/watch?v=7zpEuCTcdKk",
+  "11":"https://www.youtube.com/watch?v=VIj6xS937E4","12":"https://www.youtube.com/watch?v=gU6KTNbk0hk",
+  "13":"https://www.youtube.com/watch?v=m5E6QxKFYlM","14":"https://www.youtube.com/watch?v=5vqk6HnITko",
+  "15":"https://www.youtube.com/watch?v=9iD8DMF6odw","16":"https://www.youtube.com/watch?v=SBDO31GjNjg",
+  "17":"https://www.youtube.com/watch?v=sRdquT--KO8","18":"https://www.youtube.com/watch?v=ynTCUngbFHA",
+  "19":"https://www.youtube.com/watch?v=gcF4wppbDuA","20":"https://www.youtube.com/watch?v=OMFQvcBx-Fc",
+  "21":"https://www.youtube.com/watch?v=mXcPVtbB9pU","22":"https://www.youtube.com/watch?v=uHq0I_MDVZU",
+  "23":"https://www.youtube.com/watch?v=XCYlRBf18YI","24":"https://www.youtube.com/watch?v=ATnZmBxIvmQ",
+  "25":"https://www.youtube.com/watch?v=bq4LytNAjjM","26":"https://www.youtube.com/watch?v=5TOSlFQnnPU",
+  "27":"https://www.youtube.com/watch?v=WjLjjx8wSz0","28":"https://www.youtube.com/watch?v=TDtP4K_2CWg",
+  "29":"https://www.youtube.com/watch?v=ba_8kfpWrHU","30":"https://www.youtube.com/watch?v=OjHXJKTK14s",
+  "31":"https://www.youtube.com/watch?v=qxmUe9LOhdQ","32":"https://www.youtube.com/watch?v=LAgR52f7Fz8",
+  "33":"https://www.youtube.com/watch?v=sk2HUh7gpZs","34":"https://www.youtube.com/watch?v=-7mILjsok34",
+  "35":"https://www.youtube.com/watch?v=UgxHn8W4usI","36":"https://www.youtube.com/watch?v=eEtEPdw2dck",
+  "37":"https://www.youtube.com/watch?v=Aa4MACKaDC0","38":"https://www.youtube.com/watch?v=93DwLV0TkNs"
+};
+
+function tsToSecs(ts) {
+  const m = ts.match(/(?:(\d+)m)?(?:(\d+)s)?/);
+  return (parseInt(m[1]||0)*60)+parseInt(m[2]||0);
+}
+
+function ytUrl(number, timestamp) {
+  const key = number.toString().padStart(2,'0');
+  const base = VIDEO_URLS[key];
+  return base ? `${base}&t=${tsToSecs(timestamp)}s` : null;
+}
+
+const chat = document.getElementById('chat');
+const input = document.getElementById('question');
+const btn = document.getElementById('send-btn');
+const empty = document.getElementById('empty');
+const statusDot = document.getElementById('status-dot');
+const statusText = document.getElementById('status-text');
+
+// health check
+async function checkHealth() {
+  try {
+    const r = await fetch(`${API}/health`);
+    if (r.ok) {
+      statusDot.style.background = '#c8f542';
+      statusText.textContent = 'online';
+    }
+  } catch {
+    statusDot.style.background = '#f54242';
+    statusText.textContent = 'offline';
+  }
+}
+checkHealth();
+
+// auto-resize textarea
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+});
+
+// enter to send
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
+});
+
+btn.addEventListener('click', send);
+
+function scrollBottom() {
+  chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+}
+
+function addUserMsg(text) {
+  empty.style.display = 'none';
+  const turn = document.createElement('div');
+  turn.className = 'turn';
+  turn.innerHTML = `<div class="user-msg">${escHtml(text)}</div>`;
+  chat.appendChild(turn);
+  scrollBottom();
+  return turn;
+}
+
+function addThinking(turn) {
+  const t = document.createElement('div');
+  t.className = 'thinking';
+  t.innerHTML = `
+    <div class="thinking-dots">
+      <span></span><span></span><span></span>
+    </div>
+    <span>retrieving context</span>
+  `;
+  turn.appendChild(t);
+  scrollBottom();
+  return t;
+}
+
+function addAnswer(turn, thinking, data) {
+  thinking.remove();
+  const assistant = document.createElement('div');
+  assistant.className = 'assistant-msg';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'answer-bubble';
+  assistant.appendChild(bubble);
+
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+
+  const sources = data.sources.map(s => {
+    const url = ytUrl(s.number, s.timestamp);
+    return url
+      ? `<a class="source-chip" href="${url}" target="_blank" rel="noopener">▸ Video ${s.number} · ${s.timestamp}</a>`
+      : `<span class="source-chip">▸ Video ${s.number} · ${s.timestamp}</span>`;
+  }).join('');
+
+  const lat = data.latency;
+  meta.innerHTML = `
+    ${sources}
+    <div class="latency">
+      <span>${lat.retrieve_ms}ms retrieve</span>
+      <span>${lat.rerank_ms}ms rerank</span>
+      <span>${lat.llm_ms}ms llm</span>
+    </div>
+  `;
+
+  assistant.appendChild(meta);
+  turn.appendChild(assistant);
+  scrollBottom();
+
+  // type out the answer
+  const text = data.answer;
+  let i = 0;
+  bubble.classList.add('streaming');
+  const timer = setInterval(() => {
+    bubble.textContent = text.slice(0, i);
+    i += 4;
+    scrollBottom();
+    if (i > text.length) {
+      bubble.textContent = text;
+      bubble.classList.remove('streaming');
+      clearInterval(timer);
+    }
+  }, 16);
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function send() {
+  const q = input.value.trim();
+  if (!q || btn.disabled) return;
+
+  btn.disabled = true;
+  input.value = '';
+  input.style.height = 'auto';
+
+  const turn = addUserMsg(q);
+  const thinking = addThinking(turn);
+
+  try {
+    const r = await fetch(`${API}/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q })
+    });
+    const data = await r.json();
+    addAnswer(turn, thinking, data);
+  } catch(e) {
+    thinking.remove();
+    const err = document.createElement('div');
+    err.className = 'answer-bubble';
+    err.style.borderLeftColor = '#f54242';
+    err.style.color = '#f54242';
+    err.textContent = 'API error — is the server running?';
+    turn.appendChild(err);
+  } finally {
+    btn.disabled = false;
+    input.focus();
+    scrollBottom();
+  }
+}
+</script>
+</body>
+</html>

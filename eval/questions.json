@@ -1,0 +1,22 @@
+[
+  {"question":"what is machine learning and what are its types","expected_video":"1","note":"intro video"},
+  {"question":"how does simple linear regression work mathematically","expected_video":"2","note":"maths intuition of simple linear regression"},
+  {"question":"how to implement linear regression in python","expected_video":"3","note":"practical implementation"},
+  {"question":"what is mean squared error and RMSE","expected_video":"4","note":"MSE MAE RMSE explained"},
+  {"question":"how does lasso regression perform feature selection","expected_video":"5","note":"ridge and lasso maths"},
+  {"question":"how to implement ridge and lasso regression in python","expected_video":"6","note":"practical ridge lasso"},
+  {"question":"what is elasticnet regression and when should i use it","expected_video":"7","note":"elasticnet explained"},
+  {"question":"how does logistic regression work mathematically","expected_video":"8","note":"logistic regression maths intuition"},
+  {"question":"how to implement logistic regression in python","expected_video":"9","note":"logistic regression practical"},
+  {"question":"what is naive bayes algorithm and bayes theorem","expected_video":"10","note":"naive bayes part 1"},
+  {"question":"how does naive bayes handle continuous features","expected_video":"11","note":"naive bayes part 2"},
+  {"question":"how does k nearest neighbours work for classification","expected_video":"12","note":"KNN intuition"},
+  {"question":"what is bias variance tradeoff and overfitting","expected_video":"13","note":"overfitting underfitting bias variance"},
+  {"question":"what is precision recall and f1 score","expected_video":"14","note":"performance metrics"},
+  {"question":"how does support vector machine classifier work","expected_video":"15","note":"SVM classifier intuition"},
+  {"question":"what are svm kernels and how do they work","expected_video":"17","note":"SVM kernels"},
+  {"question":"how does decision tree split nodes using information gain","expected_video":"18","note":"decision tree part 1"},
+  {"question":"what is cross validation and why is it used","expected_video":"24","note":"cross validation in python"},
+  {"question":"what is bagging and boosting in ensemble learning","expected_video":"26","note":"ensemble bagging vs boosting"},
+  {"question":"how does gradient boosting algorithm work","expected_video":"36","note":"gradient boosting indepth"}
+]

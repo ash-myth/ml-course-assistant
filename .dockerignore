@@ -1,0 +1,8 @@
+__pycache__
+*.pyc
+.env
+audios/
+jsons/
+create_chunks.py
+embed_chunks.py
+.git
