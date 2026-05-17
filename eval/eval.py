@@ -23,6 +23,9 @@ for r in results_log:
     print(f"{status} [{r['expected']}] {r['question']}")
     if not r["hit"]:
         print(f"  got: {r['got']}")
-print(f"\nhit@3 = {hits}/{len(questions)} ({hits/len(questions)*100:.1f}%)")
+score=hits/len(questions)*100
+print(f"\nhit@3 = {hits}/{len(questions)} ({score:.1f}%)")
+if score<80:
+    sys.exit(1)
 
     
