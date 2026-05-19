@@ -207,11 +207,11 @@ curl -X POST http://localhost:7860/ask \
 ### Frontend
 ![ML Course Assistant chat UI](assets/frontend.png)
 ---
-**Design Decisions**
-
-**k=10 for retrieval** — initially set to 20 to improve recall during 
+## Design Decisions
+k=10 for retrieval — initially set to 20 to improve recall during 
 position bias experiments. Reverted to 10 after metrics showed rerank 
 was the bottleneck (p50 719ms) with no measurable quality gain from 
 higher k.
+
 ---
 ## Built by [Ashmit Chatterjee](https://github.com/ash-myth)
