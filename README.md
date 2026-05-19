@@ -196,6 +196,16 @@ curl -X POST http://localhost:7860/ask \
   }
 }
 ```
+## Screenshots
+
+### LangSmith Trace
+![LangSmith trace showing retrieve, rerank, LLM spans](assets/langsmith-trace.png)
+
+### Metrics API
+![/metrics endpoint showing p50/p95 latency breakdown](assets/metrics-endpoint.png)
+
+### Frontend
+![ML Course Assistant chat UI](assets/frontend.png)
 
 ---
 
