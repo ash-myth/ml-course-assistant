@@ -1,8 +1,8 @@
 ---
 title: Hindi ML RAG
-emoji: ◈
+emoji: 🎯
 colorFrom: green
-colorTo: black
+colorTo: gray
 sdk: docker
 pinned: false
 ---
