@@ -51,7 +51,7 @@ app.add_middleware(CORSMiddleware,allow_origins=["*"],allow_methods=["*"],allow_
 
 class QueryRequest(BaseModel):
     question:str=Field(...,min_length=3,max_length=500)
-    k:int=Field(default=20,ge=1,le=25)
+    k:int=Field(default=10,ge=1,le=25)
 class Source(BaseModel):
     title:str; number:str; timestamp:str; text:str
 class QueryResponse(BaseModel):
