@@ -17,8 +17,8 @@ def _build_context(chunks:pd.DataFrame)->list[dict]:
         start=row["start"]
         window=df[
             (df["number"]==num)&
-            (df["start"]>=start-20)&
-            (df["start"]<=start+20)
+            (df["start"]>=start-30)&
+            (df["start"]<=start+30)
         ].sort_values("start")
         parts.append({
             "title":row["title"],
