@@ -1,11 +1,3 @@
----
-title: Hindi ML RAG
-emoji: 🎯
-colorFrom: green
-colorTo: gray
-sdk: docker
-pinned: false
----
 # Hindi ML Course Teaching Assistant
 
 A cross-lingual RAG system built over 38 Hindi machine learning lectures by Krish Naik. Ask questions in English, get answers grounded in Hindi video content — with exact video and timestamp citations.
