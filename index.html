@@ -287,6 +287,7 @@
 
 <script>
 const API='https://ash-myth-rag-project.hf.space';
+const history=[];
 
 const VIDEO_URLS={
   "01":"https://www.youtube.com/watch?v=7uwa9aPbBRU","02":"https://www.youtube.com/watch?v=jerPVDaHbEA",
@@ -414,7 +415,7 @@ async function send(){
     const r=await fetch(`${API}/ask`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({question:q})
+      body:JSON.stringify({question:q,history:history.slice(-8)})
     });
     const data=await r.json();
     if(!r.ok){
@@ -424,6 +425,8 @@ async function send(){
         : (typeof detail === 'string' ? detail : 'Unable to answer that question. Please try again.');
       throw new Error(message);
     }
+    history.push({role:"user",content:q},{role:"assistant",content:data.answer});
+    if(history.length>8)history.splice(0,history.length-8);
     addAnswer(turn,thinking,data);
   }catch(e){
     thinking.remove();

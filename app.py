@@ -2,6 +2,7 @@ import time
 import threading
 from collections import deque
 from contextlib import asynccontextmanager
+from typing import Literal
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -49,9 +50,14 @@ async def lifespan(app:FastAPI):
 app=FastAPI(title="Krish Naik ML Course RAG",version="1.0.0",lifespan=lifespan)
 app.add_middleware(CORSMiddleware,allow_origins=["*"],allow_methods=["*"],allow_headers=["*"])
 
+class ChatMessage(BaseModel):
+    role:Literal["user","assistant"]
+    content:str=Field(...,min_length=1,max_length=2000)
+
 class QueryRequest(BaseModel):
     question:str=Field(...,min_length=3,max_length=500)
     k:int=Field(default=10,ge=1,le=25)
+    history:list[ChatMessage]=Field(default_factory=list,max_length=8)
 class Source(BaseModel):
     title:str; number:str; timestamp:str; text:str
 class QueryResponse(BaseModel):
@@ -70,7 +76,7 @@ def metrics(): return _metrics()
 def ask(query:QueryRequest):
     from answer import answer
     try:
-        ans,sources,latency=answer(query.question,k=query.k)
+        ans,sources,latency=answer(query.question,k=query.k,history=[message.model_dump() for message in query.history])
         _record(latency,error=False)
     except Exception as e:
         _record({"retrieve_ms":0,"rerank_ms":0,"llm_ms":0,"total_ms":0},error=True)
