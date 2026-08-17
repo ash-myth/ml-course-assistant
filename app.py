@@ -81,4 +81,6 @@ def ask(query:QueryRequest):
     except Exception as e:
         _record({"retrieve_ms":0,"rerank_ms":0,"llm_ms":0,"total_ms":0},error=True)
         raise HTTPException(status_code=500,detail=str(e))
-    return QueryResponse(answer=ans,sources=[Source(**s) for s in sources],latency=latency)
+    refusal_prefixes=("This topic isn't covered in this course.","I can only answer questions about this ML course.")
+    response_sources=[] if ans.strip().startswith(refusal_prefixes) else [Source(**s) for s in sources]
+    return QueryResponse(answer=ans,sources=response_sources,latency=latency)
