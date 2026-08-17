@@ -81,9 +81,10 @@ def _build_retrieval_query(query:str,history:list[dict])->str:
 @traceable(name="rag-pipeline",run_type="chain")
 def answer(query:str,k:int=10,history:list[dict]|None=None)->tuple[str,list[dict],dict]:
     history=history or []
+    retrieval_query=_build_retrieval_query(query,history)
     t0=time.perf_counter()
-    t=time.perf_counter(); results=_retrieve(_build_retrieval_query(query,history),k); retrieve_ms=round((time.perf_counter()-t)*1000)
-    t=time.perf_counter(); reranked=_rerank(query,results); rerank_ms=round((time.perf_counter()-t)*1000)
+    t=time.perf_counter(); results=_retrieve(retrieval_query,k); retrieve_ms=round((time.perf_counter()-t)*1000)
+    t=time.perf_counter(); reranked=_rerank(retrieval_query,results); rerank_ms=round((time.perf_counter()-t)*1000)
     context=_build_context(reranked)
     t=time.perf_counter(); ans=_llm(_build_prompt(query,context,history)); llm_ms=round((time.perf_counter()-t)*1000)
     latency={"retrieve_ms":retrieve_ms,"rerank_ms":rerank_ms,"llm_ms":llm_ms,"total_ms":round((time.perf_counter()-t0)*1000)}
