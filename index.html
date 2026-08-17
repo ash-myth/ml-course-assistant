@@ -417,6 +417,13 @@ async function send(){
       body:JSON.stringify({question:q})
     });
     const data=await r.json();
+    if(!r.ok){
+      const detail=Array.isArray(data.detail) ? data.detail[0] : data.detail;
+      const message=detail?.type === 'string_too_short'
+        ? 'Question too short, please enter at least 3 characters.'
+        : (typeof detail === 'string' ? detail : 'Unable to answer that question. Please try again.');
+      throw new Error(message);
+    }
     addAnswer(turn,thinking,data);
   }catch(e){
     thinking.remove();
@@ -424,7 +431,7 @@ async function send(){
     err.className='answer-bubble';
     err.style.borderLeftColor='#f54242';
     err.style.color='#f54242';
-    err.textContent='API error — is the server running?';
+    err.textContent=e.message || 'API error — is the server running?';
     turn.appendChild(err);
   }finally{
     btn.disabled=false;

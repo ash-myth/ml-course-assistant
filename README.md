@@ -196,6 +196,19 @@ curl -X POST http://localhost:7860/ask \
   }
 }
 ```
+## Load testing
+
+With the API running locally:
+
+```bash
+python load_test.py
+```
+
+To test a deployed instance, pass its base URL or set `RAG_API_URL`:
+
+```bash
+python load_test.py --url https://your-space.hf.space
+```
 ## Screenshots
 
 ### LangSmith Trace
