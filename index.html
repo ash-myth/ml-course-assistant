@@ -410,20 +410,24 @@ function addAnswer(turn,thinking,data){
       if (pre && pre.tagName === 'PRE') {
         const div = document.createElement('div');
         div.className = 'mermaid';
-        div.textContent = block.textContent;
         div.style.textAlign = 'center';
         div.style.padding = '1rem 0';
         div.style.background = 'var(--surface2)';
         div.style.borderRadius = '6px';
         div.style.marginBottom = '0.75rem';
         pre.replaceWith(div);
+        if (window.mermaid) {
+          try {
+            mermaid.render('mermaid-svg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9), block.textContent, (svgCode) => {
+              div.innerHTML = svgCode;
+            });
+          } catch (e) {
+            div.textContent = 'Mermaid syntax error';
+            console.error(e);
+          }
+        }
       }
     });
-    try {
-      if (window.mermaid) {
-        mermaid.init(undefined, bubble.querySelectorAll('.mermaid'));
-      }
-    } catch(e) { console.error('Mermaid error', e); }
   }
   scrollBottom();
 }
