@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ML Course Assistant</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: false, theme: 'dark' });</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -401,6 +403,28 @@ function addAnswer(turn,thinking,data){
   turn.appendChild(assistant);
   scrollBottom();
   bubble.innerHTML=marked.parse(data.answer);
+  const mermaidBlocks = bubble.querySelectorAll('code.language-mermaid');
+  if (mermaidBlocks.length > 0) {
+    mermaidBlocks.forEach((block) => {
+      const pre = block.parentElement;
+      if (pre && pre.tagName === 'PRE') {
+        const div = document.createElement('div');
+        div.className = 'mermaid';
+        div.textContent = block.textContent;
+        div.style.textAlign = 'center';
+        div.style.padding = '1rem 0';
+        div.style.background = 'var(--surface2)';
+        div.style.borderRadius = '6px';
+        div.style.marginBottom = '0.75rem';
+        pre.replaceWith(div);
+      }
+    });
+    try {
+      if (window.mermaid) {
+        mermaid.init(undefined, bubble.querySelectorAll('.mermaid'));
+      }
+    } catch(e) { console.error('Mermaid error', e); }
+  }
   scrollBottom();
 }
 
