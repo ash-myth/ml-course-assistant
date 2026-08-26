@@ -66,8 +66,9 @@ def _rerank(query:str,results:pd.DataFrame)->pd.DataFrame:
 
 @traceable(name="llm-groq",run_type="llm")
 def _llm(prompt:str)->str:
+    model = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
     r=_groq.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model=model,
         messages=[{"role":"user","content":prompt}],
         temperature=0.3,
         max_tokens=512,

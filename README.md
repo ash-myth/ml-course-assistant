@@ -82,7 +82,7 @@ Retrieval quality measured on 20 manually curated queries against ground-truth v
 | Embeddings | sentence-transformers/all-MiniLM-L6-v2 |
 | Vector Store | FAISS (IndexFlatIP) |
 | Reranker | cross-encoder/ms-marco-MiniLM-L-6-v2 |
-| LLM | Groq API — llama-3.1-8b-instant |
+| LLM | Groq API — openai/gpt-oss-20b |
 | API | FastAPI + Uvicorn |
 | Tracing | LangSmith |
 | Container | Docker + Docker Compose |
