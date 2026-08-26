@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ML Course Assistant</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -143,12 +144,21 @@
     background: var(--surface); border: 1px solid var(--border);
     border-left: 2px solid var(--accent);
     border-radius: 0 12px 12px 12px;
-    padding: 1rem 1.25rem; font-size: 0.88rem; line-height: 1.8; color: #ccc; white-space: pre-wrap;
+    padding: 1rem 1.25rem; font-size: 0.88rem; line-height: 1.8; color: #ccc;
   }
+  .answer-bubble p { margin-bottom: 0.75rem; }
+  .answer-bubble p:last-child { margin-bottom: 0; }
+  .answer-bubble code { font-family: var(--mono); background: var(--surface2); padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.85em; }
+  .answer-bubble pre { background: var(--surface2); padding: 1rem; border-radius: 6px; overflow-x: auto; margin-bottom: 0.75rem; border: 1px solid var(--border2); }
+  .answer-bubble pre code { background: none; padding: 0; font-size: 0.85em; }
+  .answer-bubble table { width: 100%; border-collapse: collapse; margin-bottom: 0.75rem; font-size: 0.85rem; }
+  .answer-bubble th, .answer-bubble td { border: 1px solid var(--border2); padding: 0.5rem 0.75rem; text-align: left; }
+  .answer-bubble th { background: var(--surface2); font-weight: 500; color: #fff; }
+  .answer-bubble ul, .answer-bubble ol { margin-bottom: 0.75rem; padding-left: 1.5rem; }
+  .answer-bubble li { margin-bottom: 0.25rem; }
+  .answer-bubble strong { color: #fff; font-weight: 500; }
 
-  .answer-bubble.streaming::after { content: '▋'; color: var(--accent); animation: blink 0.8s step-end infinite; }
 
-  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
   .meta { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-top: 0.4rem; }
 
@@ -390,15 +400,8 @@ function addAnswer(turn,thinking,data){
   assistant.appendChild(meta);
   turn.appendChild(assistant);
   scrollBottom();
-  const text=data.answer;
-  let i=0;
-  bubble.classList.add('streaming');
-  const timer=setInterval(()=>{
-    bubble.textContent=text.slice(0,i);
-    i+=4;
-    scrollBottom();
-    if(i>text.length){bubble.textContent=text;bubble.classList.remove('streaming');clearInterval(timer);}
-  },16);
+  bubble.innerHTML=marked.parse(data.answer);
+  scrollBottom();
 }
 
 function escHtml(str){return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
